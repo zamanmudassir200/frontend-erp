@@ -1,11 +1,11 @@
 "use client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getLeads, deleteLead, qualifyLead, convertLeadToOpportunity } from "../services/leadService";
-import { getOpportunities } from "../services/opportunityService"; // Import opportunity fetching function
 import { useLeadStore } from "@/store/LeadStore";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import LeadForm from "@/components/LeadForm";
+import { Loader2 } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -17,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import OpportunitiesList from "./OpportunitiesList";
 
 export default function LeadList() {
   const { leads, setLeads } = useLeadStore();
@@ -25,7 +26,6 @@ export default function LeadList() {
   const [deleteLeadId, setDeleteLeadId] = useState<string | null>(null);
   const [qualifyLeadId, setQualifyLeadId] = useState<string | null>(null);
   const [convertLeadId, setConvertLeadId] = useState<string | null>(null);
-  const [isOpportunityDialogOpen, setOpportunityDialogOpen] = useState(false); // State to open/close opportunities dialog
   const [searchTerm, setSearchTerm] = useState("");
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -35,12 +35,7 @@ export default function LeadList() {
     queryFn: getLeads,
   });
 
-  const { data: opportunitiesData, isLoading: isLoadingOpportunities } = useQuery({
-    queryKey: ["opportunities"],
-    queryFn: getOpportunities,
-    enabled: isOpportunityDialogOpen, // Fetch only when dialog opens
-  });
-
+ 
   useEffect(() => {
     if (leadsData) setLeads(leadsData.data);
   }, [leadsData, setLeads]);
@@ -82,8 +77,10 @@ export default function LeadList() {
     )
   );
 
-  if (isLoading) return <div className="text-center my-4 text-2xl">Loading...</div>;
-  if (error) return <div>Error fetching leads</div>;
+  if (isLoading) return <div className="text-center my-4 text-2xl"><Button disabled>
+  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+Loading! Please wait...</Button></div>;
+  if (error) return <div className="text-center my-4 text-2xl text-red-400">Error fetching leads</div>;
 
   return (
     <div className="my-10 max-w-[1200px] mx-auto">
@@ -95,56 +92,19 @@ export default function LeadList() {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-
-        {/* Opportunities List Button */}
-        <Dialog open={isOpportunityDialogOpen} onOpenChange={setOpportunityDialogOpen}>
-  <DialogTrigger asChild>
-    <Button>Opportunities List</Button>
-  </DialogTrigger>
-  <DialogContent className="bg-gray-900 rounded-xl flex flex-col text-white overflow-y-auto h-[550px] max-w-[1200px]">
-    <DialogHeader>
-      <DialogTitle className="text-center font-bold my-3 text-xl underline">Opportunities List</DialogTitle>
-    </DialogHeader>
-    
-
-    {isLoadingOpportunities ? (
-      <div className="text-center my-4 text-2xl">Loading opportunities...</div>
-    ) : opportunitiesData && opportunitiesData.data?.length > 0 ? (
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-        {opportunitiesData?.data?.map((opportunity: any) => (
-          <main key={opportunity._id} className="p-3 break-words rounded-lg border-2 min-w-[120px]">
-
-          <div  >
-            <p><strong>ID: </strong> <i>{opportunity._id}</i></p>
-            <h3><strong>Opportunity Name: </strong> <i>{opportunity.opportunityName}</i></h3>
-            <p><strong>Linked Lead ID: </strong> <i>{opportunity.linkedCustomerOrLead}</i></p>
-            <p><strong>Status: </strong> <i>{opportunity.stage}</i></p>
-          </div>
-
-          <Button>Edit</Button>
-          </main>
-        ))}
-      </div>
-    ) : (
-      <p className="text-red-400">No opportunities available</p>
-    )}
-
-    <DialogFooter className="flex justify-end mt-4">
-      <Button variant="destructive" onClick={() => setOpportunityDialogOpen(false)}>Close</Button>
-    </DialogFooter>
-  </DialogContent>
-</Dialog>
+        <OpportunitiesList/>
+       
       </div>
       <hr className="my-4" />
 
       {/* Leads List */}
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl-grid-cols-4 ">
         {filteredLeads && filteredLeads.length > 0 ? (
           filteredLeads.map((lead: any) => (
-            <div key={lead._id} className="p-3 break-words rounded-lg border-2 min-w-[120px]">
+            <div key={lead._id} className="relative hover:scale-105 duration-200 transition-all p-3 min-h-[410px] sm:min-h-[300px] break-words rounded-lg border-2 min-w-[120px]">
               {/* Lead details */}
               {/* Edit, Qualify, Convert, Delete, and Check Activity buttons */}
-              <p><strong>ID: </strong> <i>{lead._id}</i></p>
+              <p><strong>ID: </strong> <i className="text-green-500 font-bold">{lead._id}</i></p>
               <h3><strong>Name: </strong> <i>{lead.name}</i></h3>
               <p><strong>Email: </strong> <i>{lead.email}</i></p>
               <p><strong>Phone: </strong> <i>{lead.phone}</i></p>
@@ -179,7 +139,7 @@ export default function LeadList() {
                       disabled={lead.status === "Qualified"}
                       className={lead.status === "Qualified" ? "bg-gray-500 cursor-not-allowed" : ""}
                     >
-                      {lead.status === "Qualified" ? "Qualified" : "Qualify"}
+                      {lead.status === "Qualified" ? "Qualified" : "Qualify Lead"}
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="bg-gray-900">
@@ -229,21 +189,21 @@ export default function LeadList() {
                     <DialogFooter className="flex justify-end gap-2">
                       <Button variant="destructive" onClick={handleDelete}>Yes</Button>
                       <DialogTrigger asChild>
-                        <Button variant="destructive" onClick={() => setDeleteLeadId(null)}>No</Button>
+                        <Button variant="outline" className="text-black" onClick={() => setDeleteLeadId(null)}>No</Button>
                       </DialogTrigger>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
               </div>
-              <div className="my-1 flex items-center justify-end">
+              <div className="my-1 absolute bottom-2 right-2">
                 <Link className="border-2 transition-all duration-300 rounded-lg hover:bg-slate-200 p-1 mt-2 hover:text-black" href={`leads/activities/${lead._id}`}>
-                  Check Activity
+                  Log Activity
                 </Link>
               </div>
             </div>
           ))
         ) : (
-          <p className="text-red-400">No leads available</p>
+          <p className="text-red-400 text-xl">No leads available</p>
         )}
       </div>
     </div>

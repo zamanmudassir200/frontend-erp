@@ -581,9 +581,9 @@ export default function CreateOpportunity() {
   return (
     <>
       <main className=''>
-        <div className="max-w-xl mx-auto my-10">
-          <h2 className="text-2xl font-bold mb-4">Create Opportunity</h2>
-          <form onSubmit={(e) => e.preventDefault()}>
+        <div className="max-w-xl mx-auto px-10 my-10">
+          <h2 className="text-2xl text-center font-bold mb-4">Create Opportunity</h2>
+          <form className='max-w-[800px] p-3 rounded-lg border-2 mx-auto' onSubmit={(e) => e.preventDefault()}>
             <div className="mb-4">
               <Label htmlFor="linkedCustomerOrLead" className="block font-bold  my-2 ">Lead ID</Label>
               <Input id="linkedCustomerOrLead" value={id} disabled className="bg-gray-900 cursor-not-allowed" />

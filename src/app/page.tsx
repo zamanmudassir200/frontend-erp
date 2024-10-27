@@ -9,7 +9,7 @@ export default function Home() {
       
       <div className="relative z-10 bg-white/10 backdrop-blur-md text-white rounded-xl shadow-lg p-10 max-w-lg w-full text-center">
         <h1 className="text-5xl font-extrabold mb-6 tracking-tight">
-          Welcome to <span className="text-yellow-400">My CRM</span>
+          Welcome to <span className="text-yellow-400">CRM</span>
         </h1>
         <p className="mb-6 text-lg text-gray-300">
           Streamline your customer relationships and maximize your business potential.

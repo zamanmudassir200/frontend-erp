@@ -54,21 +54,21 @@ export default function LeadForm({ isEditing = false, leadToEdit = null, onClose
   };
 
   return (
-    <form className="max-w-[700px] mx-auto flex flex-col gap-4 border-2 rounded-xl p-5" onSubmit={handleSubmit}>
-      <Label>Name</Label>
-      <Input required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Name" />
-      <Label>Email</Label>
+    <form className="max-w-[700px] mx-auto flex flex-col gap-2 border-2 rounded-xl p-5" onSubmit={handleSubmit}>
+      <Label className="font-bold ">Name</Label>
+      <Input className="mb-1" required value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Name" />
+      <Label className="font-bold">Email</Label>
 
-      <Input required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="Email" />
-      <Label>Phone</Label>
+      <Input className="mb-1"  required value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} placeholder="Email" />
+      <Label  className="font-bold">Phone</Label>
 
-      <Input required value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="Phone" />
-      <Label>Lead Source</Label>
+      <Input className="mb-1"  required value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} placeholder="Phone" />
+      <Label className="font-bold ">Lead Source</Label>
 
-      <Input required value={formData.leadSource} onChange={(e) => setFormData({ ...formData, leadSource: e.target.value })} placeholder="Lead Source" />
-      <Label>Status</Label>
+      <Input className="mb-1" required value={formData.leadSource} onChange={(e) => setFormData({ ...formData, leadSource: e.target.value })} placeholder="Lead Source" />
+      <Label className="font-bold">Status</Label>
 
-      <Input disabled  value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} placeholder="Status" />
+      <Input className="mb-1" disabled  value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} placeholder="Status" />
       <Button type="submit">{isEditing ? "Update Lead" : "Create Lead"}</Button>
     </form>
   );

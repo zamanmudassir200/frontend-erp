@@ -1,53 +1,60 @@
-// // pages/activities.tsx
-// import ActivityForm from '@/components/ActivityForm';
-// import ActivityList from '@/components/ActivityList';
+"use client"
+import {useState, useEffect } from "react";
+import { useParams } from "next/navigation";
+import ActivityForm from "@/components/ActivityForm";
+import ActivityList from "@/components/ActivityList";
+import { useActivityStore } from "@/store/activityStore";
+import { IActivity } from "@/app/leads/activities/types";
+import { fetchActivitiesByLeadId } from "@/services/activityService";
+import {Button} from "@/components/ui/button"
+import {Loader2} from "lucide-react"
+export default function LeadActivitiesPage() {
+  const { id } = useParams();
+  const { addActivity } = useActivityStore();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-// const ActivitiesPage = () => {
-//   return (
-//     <div className="p-4">
-//       <h1 className="text-2xl font-bold">Activity Log</h1>
-//       <ActivityForm />
-//       <ActivityList />
-//     </div>
-//   );
-// };
+  useEffect(() => {
+    const fetchActivities = async () => {
+      setLoading(true); // Set loading state
+      try {
+        if (id) {
+          const response = await fetchActivitiesByLeadId(id as string);
+         response?.data.forEach((activity: IActivity) => {
+            addActivity(activity);
+          });
+        }
+      } catch (error:any) {
+        console.error(`Error fetching activities: ${error}`);
+        setError(error.message);
+      } finally {
+        setLoading(false); // Reset loading state
+      }
+    };
 
-// export default ActivitiesPage;
+    fetchActivities();
+    
+    return () => {
+      // Cleanup logic if necessary
+    };
+  }, [id]);
 
-"use client";
-import { useParams } from 'next/navigation'; // Use useParams instead of useRouter
-import { useQuery } from '@tanstack/react-query';
-import { getActivities } from '@/services/activityService'; // Import your activity service
-
-export default function LeadActivities() {
-  const { id } = useParams(); // Get the 'id' from useParams
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['activities', id],
-    queryFn: () => getActivities(id), // Fetch activities for the specific lead
-    enabled: !!id, // Only run query if ID is available
-  });
-
-  if (isLoading) return <div>Loading activities...</div>;
-  if (error) return <div>Error fetching activities</div>;
+  if (loading) return (<div className="text-center min-h-screen flex items-center justify-center"> <Button disabled>
+  <Loader2 className="mr-2 h-7 w-7 animate-spin" />
+Loading! Please wait...
+</Button>
+  </div>)
+  if (error) return <div className="min-h-screen flex items-center justify-center text-red-400 text-lg">{error}</div>;
 
   return (
-    <div className="my-10 max-w-[1200px] mx-auto">
-      <h2 className="my-4 text-2xl font-bold">Activities for Lead {id}</h2>
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 md:grid-cols-4">
-        {data?.data?.length > 0 ? (
-          data.data.map((activity: any) => (
-            <div key={activity._id} className="p-3 rounded-lg border-2">
-              <p><strong>Type:</strong> {activity.activityType}</p>
-              <p><strong>Description:</strong> {activity.description}</p>
-              <p><strong>Date:</strong> {activity.dateTime}</p>
-              <p><strong>Assigned Sales Rep:</strong> {activity.assignedSalesRep}</p>
-            </div>
-          ))
-        ) : (
-          <p>No activities logged for this lead.</p>
-        )}
-      </div>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl text-center font-bold mb-6">
+        Activities for Lead ID: <span className="text-green-400">{id}</span>
+      </h1>
+      <ActivityForm leadId= {id as string}/>
+<hr className="my-10"/>
+      {/* Include ActivityForm and ActivityList components here */}
+      <ActivityList leadId= {id as string}/>
     </div>
   );
 }
